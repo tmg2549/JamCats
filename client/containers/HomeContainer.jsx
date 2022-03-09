@@ -5,16 +5,32 @@
   cards to hold informatoin about each jam session
   */}
 import React, { useState } from 'react'
-import Queue from '../components/Queue'
-import SearchBar from '../components/SearchBar'
-function Home() {
-  const [isActive, setIsActive] = useState(false)
+import JamSessionContainer from './JamSessionContainer'
   
+// import Queue from '../components/Queue'
+// import SearchBar from '../components/SearchBar'
+
+function HomeContainer(props) {
   return (
     <div>
-      <button className='button is-primary'>Create a Jam Session!</button>
-      <div className='box'>
-        <div className='card'>
+      <div className='card-dashboard'>
+        <header className='card-header'>
+          <div className='card-header-title is-6'>
+            DASHBOARD
+          </div>
+        </header>
+        <JamSessionContainer
+          userJamSessions={props.userJamSessions}
+        />
+      </div>
+    </div>
+  )
+}
+
+export default HomeContainer
+
+
+{/* <div className='card'>
           <header className='card-header'>
           <div className='card-header-title is-6'>
             Jam Session 1
@@ -51,10 +67,4 @@ function Home() {
 
             <Queue/>
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default Home
+        </div> */}
