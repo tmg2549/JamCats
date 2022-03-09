@@ -1,0 +1,18 @@
+import React, { useState } from 'react'
+import JamSession from '../components/JamSession';
+
+function JamSessionContainer(props) {
+
+// const jSessions = [];
+// for (let i = 0; i < props.userJamSessions; i++){
+//     jSessions.push(<JamSession id={i}/>)
+// }
+return (
+    <div>
+        {/* {jSessions}; */}
+    <JamSession userObj={props.userObj}/>
+    </div>
+)
+}
+
+export default JamSessionContainer
