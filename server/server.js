@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const app = express();
 const cookieParser = require('cookie-parser');
 const fetch = require('node-fetch');
-require('dotenv').config()
+require('dotenv').config();
 
 const PORT = 3000;
 
@@ -21,17 +21,13 @@ app.use(cookieParser());
 
 // serve all the static files within the client folder, images
 app.use(express.static(path.join(__dirname, '../client')));
-// in production mode, need to serve bundle file in build folder? 
-
-
-
+// in production mode, need to serve bundle file in build folder?
 
 // serve the index.html file for the homepage
 // new items: serve up user information, session information, and possibly new tokens on GET request
 app.get('/', (req, res) => {
   res.status(200).send(path.resolve(__dirname, '../client/index.html'));
 });
-
 
 // define route handlers
 // app.use('/signup', signUpRouter);
@@ -40,10 +36,8 @@ app.use('/user', userRouter);
 app.use('/jamSession', jamSessionRouter);
 app.use('/search', searchRouter);
 
-
-
 // Catch all request to unknown routes
-app.use('*',(req, res) => res.status(404).send('404: Page Not Found :/'));
+app.use('*', (req, res) => res.status(404).send('404: Page Not Found :/'));
 
 // Global error handler to catch any middleware error
 app.use((err, req, res, next) => {
@@ -57,7 +51,8 @@ app.use((err, req, res, next) => {
   return res.status(errorObj.status).json(errorObj.message);
 });
 
-
-app.listen(PORT, () => {console.log(`Server listening on ${PORT}`)});
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
 
 module.exports = app;
