@@ -3,13 +3,14 @@ import JamSession from '../components/JamSession';
 
 function JamSessionContainer(props) {
 
-const jSessions = [];
-for (let i = 0; i < props.userJamSessions; i++){
-    jSessions.push(<JamSession id={i}/>)
-}
+// const jSessions = [];
+// for (let i = 0; i < props.userJamSessions; i++){
+//     jSessions.push(<JamSession id={i}/>)
+// }
 return (
     <div>
-        {jSessions};
+        {/* {jSessions}; */}
+    <JamSession userObj={props.userObj}/>
     </div>
 )
 }

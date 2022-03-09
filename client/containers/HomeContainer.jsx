@@ -9,8 +9,11 @@ import JamSessionContainer from './JamSessionContainer'
   
 // import Queue from '../components/Queue'
 // import SearchBar from '../components/SearchBar'
+// let [activeJamSession, setActiveJamSession] = useState(false);
+// activateJamSession
 
 function HomeContainer(props) {
+  //if (noActiveJamSession)
   return (
     <div>
       <div className='card-dashboard'>
@@ -20,11 +23,17 @@ function HomeContainer(props) {
           </div>
         </header>
         <JamSessionContainer
-          userJamSessions={props.userJamSessions}
+          // userJamSessions={props.userJamSessions}
+          userObj = {props.userObj}
+          // setActiveJamSession={setActiveJamSession}
         />
       </div>
     </div>
   )
+  //else if (activeJamSession)
+  //return(
+    //<ActiveJamSession/>
+  //)
 }
 
 export default HomeContainer

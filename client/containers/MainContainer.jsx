@@ -5,11 +5,25 @@ import HomeContainer from './HomeContainer.jsx';
 
 function MainContainer() {
   let [isAuthenticated, setAuthenticationStatus] = useState(false);
-  let [userObj, setUserObj] = useState([]);
+  let [userObj, setUserObj] = useState([{ 
+    spotifyProfile:'spotifyProfile', 
+    dbInfo:'dbInfo', 
+    authenticated:'authenticated', 
+    jamSessions:'jamSessions', 
+    playlists:'playlists'
+  }]); //{ spotifyProfile, dbInfo, authenticated, jamSessions, playlists }
 
   useEffect ( () => {
     let authStatus = confirm('would you like to log in')
     setAuthenticationStatus(authStatus);
+    // fetch('http://localhost:8080/user/info')
+    // .then(res => res.json())
+    // .then(data => {
+    //   console.log(data);
+    //   setAuthenticationStatus(true);
+    //   setUserObj(data);
+    // })
+    // .catch((error) => {console.error('Error:', error);})
   },[])
   
 
@@ -28,8 +42,7 @@ function MainContainer() {
     return(
     <div>
         <div><Navbar isAuthenticated={isAuthenticated}/></div>
-        <HomeContainer
-          userJamSessions = {3}
+        <HomeContainer userObj = {userObj}
         />
     </div>
     );
