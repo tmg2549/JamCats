@@ -1,55 +1,122 @@
 const path = require('path');
-const User = require('../models/userModels.js');
+const User = require('../models/userModel.js');
+const JamSession = require('../models/jamSessionModel.js');
 const querystring = require('query-string');
 const fetch = require('node-fetch');
+const { user } = require('pg/lib/defaults');
 
 const userController = {};
 
-userController.createUser = async (req, res, next) => {
+userController.validateCookie = (req, res, next) => {
+  console.log('in validateCookie');
+  if (!req.cookies.spotify_access_token) {
+    return res.status(200).json({ authenticated: false });
+  }
+  res.locals.authenticated = true;
+  return next();
+};
+
+userController.checkUser = async (req, res, next) => {
   //initiate fetch request with access token to get user info
+  console.log('in checkUser');
   const authOptions = {
     headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-      Authorization:
-        "Bearer " + req.cookies.spotify_access_token,
-    }
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + req.cookies.spotify_access_token,
+    },
   };
   //need to combine spotify profile and user info (redundant info)
-  const spotifyProfile = await fetch("https://api.spotify.com/v1/me", authOptions).then(data => data.json());
+  const spotifyProfile = await fetch(
+    'https://api.spotify.com/v1/me',
+    authOptions
+  ).then((data) => data.json());
+  // check if spotify responded with error
+  if (spotifyProfile.error) {
+    if (spotifyProfile.error.status === 401) {
+      // token expired ==> refresh token
+      return res.redirect('/login/refresh_token');
+    }
+    if (spotifyProfile.error.status === 403) {
+      // bad token ==> redirect to main page, refresh will not work here
+      return res.redirect('/');
+    }
+  }
   const { display_name, email, href, id, images } = spotifyProfile;
-  // HOld off for now
-  res.locals.spotifyProfile = { display_name, email, href, images }
+  res.locals.spotifyProfile = { display_name, email, href, images };
   // use findOne to look and see if user exists
-  // otherwise, store jam session info in locals and move on to next piece of middleware
-  //store/update the user's document in the MongoDB database
   User.findOne({ spotifyId: id }, (err, user) => {
     if (err) {
       return next({
-        log: 'Error in authController.createUser',
+        log: 'Error in userController.checkUser',
         status: 400,
-        message: { err: 'An error occurred while inserting a user into the database' },
-      })
+        message: {
+          err: 'An error occurred while inserting a user into the database',
+        },
+      });
     }
-    //if null (or doesn't exist) run create user method
+
+    //if null (or doesn't exist) run create user method and return info to client
     if (!user) {
-      User.create({ spotifyId: id }, (err, user) =>  {
+      User.create({ spotifyId: id }, (err, user) => {
         if (err) {
           return next({
-            log: 'Error in authController.createUser',
+            log: 'Error in userController.checkUser',
             status: 400,
-            message: { err: 'An error occurred while inserting a user into the database' },
-          })
+            message: {
+              err: 'An error occurred while inserting a user into the database',
+            },
+          });
         }
-        res.locals.dbInfo = user
-        return next();
-      })
+        res.locals.dbInfo = user;
+        return res.status(200).json(res.locals);
+      });
     }
-    else {
-      res.locals.dbInfo = user;
-      return next();
+
+    // otherwise, store user info and move on to next middleware
+    res.locals.dbInfo = user;
+    return next();
+  });
+};
+
+// get jam sessions from jamSession colleciton utilizing user's ID
+userController.getJamSessions = (req, res, next) => {
+  // find jam sessions using the user's document id, which will be stored in each jam session
+  console.log('in getJamSessions');
+  JamSession.find({ hostId: res.locals.dbInfo._id }, (err, sessions) => {
+    if (err) {
+      return next({
+        log: 'Error in userController.getJamSessions',
+        status: 400,
+        message: {
+          err: "An error occurred while retrieving a user's jam sessions",
+        },
+      });
     }
-  })
-} 
+    res.locals.jamSessions = sessions;
+    return next();
+  });
+};
+
+// use sessions from previous middleware to query spotify for playlist info
+userController.getPlaylists = async (req, res, next) => {
+  console.log('in getPlaylists');
+  const authOptions = {
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + req.cookies.spotify_access_token,
+    },
+  };
+  // map jam session playlist IDs to request URLs
+  const playlistUrls = res.locals.jamSessions.map((session) =>
+    fetch(
+      'https://api.spotify.com/v1/playlists/' + session.playlistId,
+      authOptions
+    ).then((data) => data.json())
+  );
+  res.locals.playlists = await Promise.all(playlistUrls);
+  return next();
+};
 
 module.exports = userController;
