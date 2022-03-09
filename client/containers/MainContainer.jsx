@@ -20,10 +20,10 @@ function MainContainer() {
     // .then(res => res.json())
     // .then(data => {
     //   console.log(data);
-    //   setAuthenticationStatus(true);
-    //   setUserObj(data);
+    //   // setAuthenticationStatus(true);
+    //   // setUserObj(data);
     // })
-    // .catch((error) => {console.error('Error:', error);})
+    // .catch((error) => {console.error('Error useEffect:', error);})
   },[])
   
 
